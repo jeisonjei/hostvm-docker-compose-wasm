@@ -22,9 +22,10 @@ services:
     environment:
       PGUSER: "postgres"
       POSTGRES_PASSWORD: "1234"
-    volumes:
-      - ./data:/data
     networks: 
       - net
     ports: 
       - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+  
