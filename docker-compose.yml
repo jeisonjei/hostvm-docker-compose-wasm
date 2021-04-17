@@ -8,24 +8,40 @@ services:
     container_name: hostvm_app
     # здесь указывается имя сервиса (postgres), не имя контейнера с базой данных (container_name: db)
     depends_on: 
-      - postgres
+        postgres:
+          condition: service_healthy
+    # используем сеть, чтобы соединиться с контейнером базы данных
     networks: 
       - net
+    # соединим порт локального компьютера с портом в контейнере
     ports: 
       - 8000:80
+    # переопределим строку подключения к базе данных, указанную в appsettings.json. здесь в качестве сервера указываем назначенное имя (container_name) контейнера postgres. Здесь вместо Host нужно указывать Server, а вместо двоеточия между ConnectionStrings и def лучше указывать двойное подчёркивание
     environment:
         - ConnectionStrings__def=Server=hostvm_db;Port=5432;Database=hostvm;Username=postgres;Password=1234
   postgres:
+    # используем образ из репозитория hub.docker
     image: postgres
+    # назначим имя контейнеру, это имя будет использоваться в строке подключения к базе данных
     container_name: hostvm_db
     restart: always
     environment:
       PGUSER: "postgres"
       POSTGRES_PASSWORD: "1234"
+    # используем сеть, чтобы соединить контейнеры
     networks: 
       - net
     ports: 
       - 5432:5432
+    # свяжем папку с данными в контейнере с локальной папкой. в этой папке будут сохраняться данные даже после удаления контейнера
     volumes:
       - ./data:/var/lib/postgresql/data
+    # так как при использовании volumes для postgres запуск postgres запаздывает, добавим ожидание postgres. без использования healthcheck docker-compose up сработает со второго раза (когда будут созданы файлы в папке data)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+  
   
