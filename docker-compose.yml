@@ -1,0 +1,31 @@
+version: '3.4'
+networks: 
+  net:
+    driver: bridge
+    name: hostvm_net
+services:
+  web:
+    image: nexus3.hostco.ru:55555/hostvmserver:develop50
+    container_name: hostvm_app
+    # здесь указывается имя сервиса (postgres), не имя контейнера с базой данных (container_name: db)
+    depends_on: 
+      - postgres
+    networks: 
+      - net
+    ports: 
+      - 8000:80
+    environment:
+        - ConnectionStrings__def=Server=hostvm_db;Port=5432;Database=hostvm;Username=postgres;Password=1234
+  postgres:
+    image: postgres
+    container_name: hostvm_db
+    restart: always
+    environment:
+      PGUSER: "postgres"
+      POSTGRES_PASSWORD: "1234"
+    # volumes:
+    #   - ./data:/var/lib/postgresql/data
+    networks: 
+      - net
+    ports: 
+      - 5432:5432
