@@ -4,7 +4,7 @@ networks:
     driver: bridge
 services:
   web:
-    image: nexus3.hostco.ru:55555/hostvm_app:stable
+    image: nexus3.hostco.ru:55555/hostvm_app:ad-settings
     container_name: hostvm_app
     # здесь указывается имя сервиса (postgres), не имя контейнера с базой данных (container_name: db)
     depends_on: 
